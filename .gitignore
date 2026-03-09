@@ -1,0 +1,18 @@
+# === CREDENCIALES - NUNCA subir a Git ===
+credentials/
+*.json
+token.pickle
+token.json
+*.pickle
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+venv/
+.venv/
+
+# Logs
+*.log

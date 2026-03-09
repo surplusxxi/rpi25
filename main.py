@@ -1,9 +1,14 @@
 import os
-from google.oauth2.service_account import Credentials
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
-# Archivo de credenciales descargado desde Google Cloud Console
-CREDENTIALS_FILE = "credentials.json"
+# Archivo de credenciales OAuth2 descargado desde Google Cloud Console
+CREDENTIALS_FILE = "client_secret_429576443186-lfqjcgj19asf5fjlavpq00vceito1a1k.apps.googleusercontent.com.json"
+
+# Token guardado localmente tras el primer login
+TOKEN_FILE = "token.json"
 
 # Permisos para todas las APIs
 SCOPES = [
@@ -12,9 +17,7 @@ SCOPES = [
     "https://www.googleapis.com/auth/gmail.modify",       # Gmail
     "https://www.googleapis.com/auth/calendar",           # Google Calendar
     "https://www.googleapis.com/auth/docs",               # Google Docs
-    "https://www.googleapis.com/auth/forms",              # Google Forms
     "https://www.googleapis.com/auth/youtube",            # YouTube
-    "https://www.googleapis.com/auth/cloud-platform",     # Google Cloud
 ]
 
 # IDs de recursos (editar según tu proyecto)
@@ -23,9 +26,23 @@ CALENDAR_ID = "primary"
 FOLDER_ID_DRIVE = "TU_FOLDER_ID"
 
 
+def get_credentials():
+    creds = None
+    if os.path.exists(TOKEN_FILE):
+        creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_FILE, SCOPES)
+            creds = flow.run_local_server(port=0)
+        with open(TOKEN_FILE, "w") as token:
+            token.write(creds.to_json())
+    return creds
+
+
 def get_service(api, version):
-    creds = Credentials.from_service_account_file(CREDENTIALS_FILE, scopes=SCOPES)
-    return build(api, version, credentials=creds)
+    return build(api, version, credentials=get_credentials())
 
 
 # ─── GOOGLE SHEETS ────────────────────────────────────────────────────────────

@@ -88,6 +88,8 @@ def authenticate() -> object:
                 sys.exit(1)
             flow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
             flow.redirect_uri = "urn:ietf:wg:oauth:2.0:oob"
+            flow.autogenerate_code_verifier = False
+            flow.code_verifier = None
             auth_url, _ = flow.authorization_url(prompt="consent")
             print("\n" + "="*60)
             print("AUTORIZACIÓN REQUERIDA")

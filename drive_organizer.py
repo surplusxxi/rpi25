@@ -87,7 +87,19 @@ def authenticate() -> object:
                 print("  4. Descargar como 'credentials.json' en este directorio")
                 sys.exit(1)
             flow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
-            creds = flow.run_local_server(port=0)
+            flow.redirect_uri = "urn:ietf:wg:oauth:2.0:oob"
+            auth_url, _ = flow.authorization_url(prompt="consent")
+            print("\n" + "="*60)
+            print("AUTORIZACIÓN REQUERIDA")
+            print("="*60)
+            print("\n1. Abrí este enlace en tu navegador:\n")
+            print(f"   {auth_url}\n")
+            print("2. Iniciá sesión con laureanoalimenti@gmail.com")
+            print("3. Aceptá los permisos")
+            print("4. Copiá el código que aparece y pegalo acá\n")
+            code = input("Código de autorización: ").strip()
+            flow.fetch_token(code=code)
+            creds = flow.credentials
         with open(token_path, "w") as token:
             token.write(creds.to_json())
 
